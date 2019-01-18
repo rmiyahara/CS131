@@ -29,4 +29,19 @@ let rec computed_fixed_point eq f x =
 
 (*OK, now for the real work. Write a function filter_reachable g that returns a copy of the grammar g with all unreachable rules removed.
 * This function should preserve the order of rules: that is, all rules that are returned should be in the same order as the rules in g.*)
+(*Types from TA slides*)
+type ('nonterminal, 'terminal) symbol =
+    | N of 'nonterminal
+    | T of 'terminal
+
+(*Remove terminals*)
+let rec filter_nonterminal a = match a with
+    [] -> []
+    | N head :: tail -> head :: filter_nonterminal tail
+    | T _ :: tail -> filter_nonterminal tail
+
+let symbols_reach =
+    
+
 let filter_reachable g =
+    Pervasives.fst(g, List.filter(fun x -> List.mem(Pervasives.fst) (symbols_reach g)) Pervasives.snd g);;
