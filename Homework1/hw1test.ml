@@ -1,9 +1,15 @@
 let subset_test0 = subset [] [1;2;3]
 let subset_test1 = subset [3;1;3] [1;2;3]
 let subset_test2 = not (subset [1;3;7] [4;1;3])
+let subset_test3 = subset [] []
+let subset_test4 = subset [1] [1; 1; 1; 1; 1]
+let subset_test5 = not (subset [1; 2; 3; 4; 5] [])
 
 let equal_sets_test0 = equal_sets [1;3] [3;1;3]
 let equal_sets_test1 = not (equal_sets [1;3;4] [3;1;3])
+let equal_sets_test2 = equal_sets [] []
+let equal_sets_test3 = not (equal_sets [1; 2; 3] [])
+let equal_sets_test4 = equal_sets [1; 42069] [42069; 1]
 
 let set_union_test0 = equal_sets (set_union [] [1;2;3]) [1;2;3]
 let set_union_test1 = equal_sets (set_union [3;1;3] [1;2;3]) [1;2;3]
@@ -125,3 +131,29 @@ let giant_test1 =
 
 let giant_test2 =
   filter_reachable (Quiet, snd giant_grammar) = (Quiet, [Quiet, []])
+
+type astronomical_test =
+  | Set | Battlefield | Final | Town | Lylat | Kalos | Castle
+
+(*Assume set can only end on a counterpick (Town, Kalos, Casle)*)
+let stage_grammar =
+  Set,
+  [Town, [T"What a finish"];
+    Kalos, [T"Wowser!!!"];
+    Castle, [T"Did he just walk up slowly and Downsmash?"];
+    Battlefield, [N Town];
+    Battlefield, [N Kalos];
+    Battlefield, [N Castle];
+    Battlefield, [N Final];
+    Final, [N Town];
+    Final, [N Kalos];
+    Final, [N Castle];
+    Final, [N Final]
+  ]
+
+let stage_test0 = not (filter_reachable stage_grammar = stage_grammar)
+let stage_test1 = not (filter_reachable (Battlefield, List.tl(snd stage_grammar)) =
+  (Battlefield,
+    [Town, [T"What a finish"]; Kalos, [T"Wowser!!!"]; Castle, [T"Did he just walk up slowly and Downsmash?"];
+    Battlefield, [N Town]; Battlefield, [N Kalos]; Battlefield, [N Castle]; Battlefield, [N Final]; Battlefield, [N Battlefield]]))
+
