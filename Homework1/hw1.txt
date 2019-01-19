@@ -1,0 +1,8 @@
+    Due to their trivial definitions, I will only be explaining number 7 (filter_reachable)
+    
+    The main issue with this problem is finding the reachable nonterminal elements. This is performed
+using the symbols_reach function. This function uses the previously made functions (compute_fixed_point
+and equal_sets) along with an auxilary function that removes all terminal elements from the list to
+provide me with the list I need to continue this problem.
+    The next part was to filter through the rule set for the rules which were considered "reachable".
+The expected results were then able to be provided.

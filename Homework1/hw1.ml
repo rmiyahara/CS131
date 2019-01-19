@@ -27,21 +27,28 @@ let set_diff a b =
 let rec computed_fixed_point eq f x =
     if eq (f x) x then x else computed_fixed_point eq f (f x);;
 
-(*OK, now for the real work. Write a function filter_reachable g that returns a copy of the grammar g with all unreachable rules removed.
-* This function should preserve the order of rules: that is, all rules that are returned should be in the same order as the rules in g.*)
 (*Types from TA slides*)
 type ('nonterminal, 'terminal) symbol =
     | N of 'nonterminal
-    | T of 'terminal
+    | T of 'terminal;;
 
 (*Remove terminals*)
-let rec filter_nonterminal a = match a with
+let rec remove_terminal = function
+    | [] -> []
+    | N head :: tail -> head :: remove_terminal tail
+    | T _ :: tail -> remove_terminal tail;;
+
+(*Only reachable symbols*)
+let rec only_reachable a b = match a with
     [] -> []
-    | N head :: tail -> head :: filter_nonterminal tail
-    | T _ :: tail -> filter_nonterminal tail
+    | head :: tail -> match head with
+        c,d -> if List.mem c b then (c :: remove_terminal d)@only_reachable tail b else only_reachable tail b;;
 
-let symbols_reach =
+(*Pulls only definite symbols*)
+let symbols_reach f =
+    computed_fixed_point equal_sets (only_reachable (Pervasives.snd f)) [Pervasives.fst f];;
     
-
+(*OK, now for the real work. Write a function filter_reachable g that returns a copy of the grammar g with all unreachable rules removed.
+* This function should preserve the order of rules: that is, all rules that are returned should be in the same order as the rules in g.*)
 let filter_reachable g =
-    Pervasives.fst(g, List.filter(fun x -> List.mem(Pervasives.fst) (symbols_reach g)) Pervasives.snd g);;
+    Pervasives.fst g, List.filter(fun x -> List.mem(Pervasives.fst x) (symbols_reach g)) (Pervasives.snd g);;
