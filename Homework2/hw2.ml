@@ -6,5 +6,11 @@
 
 let convert_grammar gram1 =
 
-type ()
-let rec parse_tree_leaves tree =
+type ('nonterminal, 'terminal) parse_tree =
+  | Node of 'nonterminal * ('nonterminal, 'terminal) parse_tree list
+  | Leaf of 'terminal
+
+let rec parse_tree_leaves tree = match tree with
+    [] -> []
+    | Leaf head :: tail -> head :: parse_tree_leaves tail
+    | Node _ :: tail -> parse_tree_leaves tail
