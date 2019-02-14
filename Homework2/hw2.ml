@@ -4,7 +4,7 @@
 * EMAIL: rmiyahara144@gmail.com
 *)
 
-let convert_grammar gram1 =
+let rec convert_grammar gram1 =
 
 type ('nonterminal, 'terminal) parse_tree =
   | Node of 'nonterminal * ('nonterminal, 'terminal) parse_tree list
