@@ -1,7 +1,5 @@
 %Huge shout outs to the TA slides. They were such a huge help.
 %Anytime a finite domain solver is used, I learned how to implement it throught the slides.
-%Trivial function to verify N is not negative
-is_pos(N) :- N >= 0.
 
 %This function is used to check that T contains N elements
 lateral_check([], _). %Base case
@@ -68,7 +66,6 @@ answer_check(T, CoolerT, Top, Bottom, Left, Right) :-
 
 tower(N, T, C) :-
     %Perform basic checks on parameters
-    is_pos(N) , %Make sure N is a non-negative value
     length(T, N) , %Make sure T contains N lists
     lateral_check(T, N) , %Makes sure each list in T contains N elements
     C = counts(Top, Bottom, Left, Right) , %Taken from specs
@@ -82,34 +79,108 @@ tower(N, T, C) :-
     transpose(T, CoolerT) , %Flips T so it may be checked in the other direction
     maplist(fd_all_different, CoolerT) , %Makes sure that each element in each list is different
     value_check(N, CoolerT) , %Checks values
+    %Finally, check for real answers
     maplist(fd_labeling, T) , %Unique answers
     answer_check(T, CoolerT, Top, Bottom, Left, Right). %Finally, check the answer now that parameters are fine
 
 %Here is where I will implement my own slower versions of fd things
-%Bad version of fd_all_different
-all_different_but_bad([], _). %Base case
-all_different_but_bad([ Head | Tail ], History) :-
-    not(member(Head, History)) , %If haven't seen before
-    all_different_but_bad(Tail, [ Head | History ]). %Check the rest
+%fd_domain replacement
+domain_check(_, []). %Base case
+domain_check(N, [ Head | Tail]) :- %Make sure all numbers are in place
+    Max is N + 1 ,
+    Head #< Max ,
+    Head #> 0 ,
+    domain_check(N, Tail).
+
+%fd_all_different replacement
+all_different(_, []). %Base case
+all_different(History, [ Head | Tail]) :-
+    \+ member(Head, History) , % Thank you TA slides
+    all_different([ Head | History], Tail).
+
+%fd_labeling replacement
+label_check(N, T) :-
+    %findall tutorial: http://www.cse.unsw.edu.au/~billw/dictionaries/prolog/findall.html
+    findall(Holdme, between(1, N, Holdme), Goeshere) ,
+    %permutation tutorial: http://www.swi-prolog.org/pldoc/man?predicate=permutation/2
+    permutation(Goeshere, T).
 
 plain_tower(N, T, C) :-
     %Perform basic checks on parameters
-    is_pos(N) , %Make sure N is a non-negative value
     length(T, N) , %Make sure T contains N lists
     lateral_check(T, N) , %Makes sure each list in T contains N elements
     C = counts(Top, Bottom, Left, Right) , %Taken from specs
-    maplist(all_different_but_bad, T) , %Instead of fd_all_different
-    %Instead of value_check (That uses fd_domain)
+    maplist(domain_check(N), T) ,
+    maplist(all_different([]), T) ,
     %Check that tower counts are valid
     length(Top, N) ,
     length(Bottom, N) ,
     length(Left, N) ,
     length(Right, N) , 
+    maplist(label_check(N), T) ,
     transpose(T, CoolerT) , %Flips T so it may be checked in the other direction
-    maplist(all_different_but_bad, CoolerT) , %Instead of fd_all_different for the transpose
-    %Instead of value_check (That uses fd_domain) fpr the transpose
-    % Get rid ununique answers without fd_labeling
+    maplist(all_different([]), CoolerT) , %fd_all_different
+    %Finally, for real answers
     answer_check(T, CoolerT, Top, Bottom, Left, Right). %Finally, check the answer now that parameters are fine
+
+%Run an example 20 times to avoid divide by 0 error
+tower_alot(Tt) :-
+    statistics(cpu_time, [Ti,_]) ,
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    statistics(cpu_time, [Tf, _]) ,
+    Tt is Tf - Ti .
+
+%Run an example 20 times to avoid divide by 0 error
+plain_tower_alot(Pt) :-
+    statistics(cpu_time, [Pi,_]) ,
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    plain_tower(5, [[2,3,4,5,1], [5,4,1,3,2], [4,1,5,2,3], [1,2,3,4,5], [3,5,2,1,4]], C),
+    statistics(cpu_time, [Pf, _]) ,
+    Pt is Pf - Pi .
+
+speedup(Answer) :-
+    %Unify the argument to the fp ratio of tower's CPU time to plain
+    %Tutorial for statistics: http://gprolog.univ-paris1.fr/manual/html_node/gprolog048.html#statistics%2F2
+    tower_alot(Tt) ,
+    plain_tower_alot(Pt) , 
+    Answer is (Pt/Tt) .
 
 ambiguous(N, C, T1, T2) :-
     tower(N, T1, C) , %Check first solution
