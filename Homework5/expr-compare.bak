@@ -1,0 +1,8 @@
+(define (expr-compare x y)
+    (cond
+        [(equal? x y) (x)]
+        [(and (boolean? x) (boolean? y) (equal? x #t)) ('(%))]
+        [(and (boolean? x) (boolean? y) (equal? y #t)) ('(not %))]
+        [else ("What have i done")]
+    )
+)

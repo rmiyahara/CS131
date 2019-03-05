@@ -1,0 +1,5 @@
+(equal? 12 (expr-compare 12 12))
+(equal? #t (expr-compare #t #t))
+(equal? #f (expr-compare #f #f))
+(equal? '(%) (expr-compare #t #f))
+(equal? '(not %) (expr-compare #f #t))
