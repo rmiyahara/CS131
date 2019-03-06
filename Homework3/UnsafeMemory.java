@@ -16,7 +16,7 @@ class UnsafeMemory {
 	    else if (args[0].equals("Synchronized"))
 		s = new SynchronizedState(stateArg, maxval);
 		else if (args[0].equals("Unsynchronized"))
-		s = new Unsynchronized(stateArg, maxval); //Unsynchronized
+		s = new UnsynchronizedState(stateArg, maxval); //Unsynchronized
 		else if (args[0].equals("GetNSet"))
 		s = new GetNSet(stateArg, maxval); //GetNSet
 		else if (args[0].equals("BetterSafe"))

@@ -28,7 +28,7 @@ class GetNSet implements State {
         int n = size(); //Reduce overhead
         byte[] result = new byte[size()]; //Puts values into a byte array and returns it
         for(int i = 0; i < n; i++) {
-            result[i] = value.get(i);
+            result[i] = (byte)value.get(i);
         }
         return result;
     }

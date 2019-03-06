@@ -1,16 +1,41 @@
 #lang racket
 ;;Part1
-(define (expr-compare x y)
-  ;;Handles easy cases
+(define (toString x) (symbol->string x))
+;;(define (quoteCheck))
+(define (baby-food x y)
   (cond
     [(equal? x y) x]
-    [(and (boolean? x) (boolean? y) (equal? x #t)) '(%)]
+    [(and (boolean? x) (boolean? y) (equal? x #t)) '%]
     [(and (boolean? x) (boolean? y) (equal? y #t)) '(not %)]
+    [else (quasiquote(if % (unquote x) (unquote y)))]
   )
-  ;;Handles the list cases
+)
+
+(define (real-food x y)
   (cond
-    ["Fugma"]
+    [(and (equal? x '()) (equal? y '())) '()]
+    ;;Fix the logic for this
+    [(and (or (symbol? (car x)) (symbol? (car y))) (xor (equal? (toString(car x)) "if") (equal? (toString(car y)) "if"))) (quasiquote(if % (unquote x) (unquote y)))]
+    ;;Whata do with quotes my guy
+    [(and (symbol? (car x)) (symbol? (car y)) (and (equal? (car x) quote) (equal? (car y) quote))) ]
+    [(and (equal? (cdr x) '()) (not(equal? (cdr y) '()))) (quasiquote(if % (unquote x) (unquote y)))]
+    [(and (equal? (cdr y) '()) (not(equal? (cdr x) '()))) (quasiquote(if % (unquote x) (unquote y)))]
+    [(and (list? (car x)) (list? (car y))) (cons (real-food (car x) (car y)) (real-food (cdr x) (cdr y)))]
+    [(list? (car x)) (cons (quasiquote(if % (unquote(car x)) (unquote(car y)))) (real-food (cdr x) (cdr y)))]
+    [(list? (car y)) (cons (quasiquote(if % (unquote(car x)) (unquote(car y)))) (real-food (cdr x) (cdr y)))]
+    [(equal? (car x) (car y)) (cons (car x) (real-food (cdr x) (cdr y)))]
+    [else (cons (quasiquote(if % (unquote(car x)) (unquote(car y)))) (real-food (cdr x) (cdr y)))]
   )
+)
+(define (expr-compare x y)
+  (cond
+    ;;Handles the list cases
+    [(and (list? x) (list? y)) (real-food x y)]
+    ;;If one is a list
+    [(xor (list? x) (list? y)) (quasiquote(if % (unquote x) (unquote y)))]
+    ;;Handles the easy cases
+    [else(baby-food x y)]
+    )
 )
 
 ;;Part2

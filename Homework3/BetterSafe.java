@@ -14,8 +14,9 @@ class BetterSafe implements State {
     public byte[] current() { return value; }
 
     public boolean swap(int i, int j) {
-        hold_me.lock() //Begin critical code
+        hold_me.lock(); //Begin critical code
 	    if (value[i] <= 0 || value[j] >= maxval) {
+            hold_me.unlock(); //LOL I FORGOT THIS IM DUMB
 	        return false;
 	    }
 	    value[i]--;
