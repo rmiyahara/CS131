@@ -2,6 +2,8 @@ import sys
 import os
 import asyncio
 import atexit
+import json
+import time
 
 import serverinfo
 def checkservername(name): #Exits if server is not valid
@@ -19,8 +21,22 @@ def close_logfile(): # Closes the logfile file descriptor
     print("PROXY: File closed")
     return
 
+# Future documentation: https://docs.python.org/3/library/asyncio-eventloop.html#creating-futures-and-tasks
+async def client_handler(reader, writer):
+    # Grab lines from reader
+    # StramReader documentation : https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader
+    holdme = await reader.readline()
+    # POSIX Time: https://docs.python.org/3/library/time.html
+    received_time = time.time()
+    print("PROXY: " + str(received_time))
+    holdme = holdme.decode()
+    logfile_fd.write('Received: ' + str(holdme) + '\n') #TODO: Format this, thanks
+    logfile_fd.flush()
+
+    return
+
 def main():
-    # Global variables so that I don't have to pass them everytime
+    # Global variables so that I don't have to pass them everytime mb
     global name
     global logfile
     global logfile_fd
@@ -32,11 +48,15 @@ def main():
     # Set server name
     name = sys.argv[1]
     checkservername(name)
+
+    #Get port number
+    port_num = serverinfo.server_portnums[name]
+    print("PROXY: Port number: " + str(port_num))
     
     # Open log file
     logfile = name + ".txt"
     # Try documentation: https://docs.python.org/3/tutorial/errors.html
-    # Remove
+    # Remove file if it's there
     try:
         os.remove(logfile)
     except FileNotFoundError:
@@ -45,8 +65,23 @@ def main():
     logfile_fd = open(logfile, 'w')
     # Atexit documenteation: https://docs.python.org/3/library/atexit.html
     atexit.register(close_logfile)
+
+    # Coroutine stuff
+    # Give me the loop brother
+    brother = asyncio.get_event_loop()
+    # Shout outs to the TA slides
+    server = asyncio.start_server(client_handler, host = '127.0.0.1', port = port_num, loop = brother)
+    proxy = brother.run_until_complete(server)
+    try:
+        brother.run_forever()
+    except KeyboardInterrupt:
+        print("PROXY: Keyboard Interrupt")
+        pass
+    proxy.close()
+    brother.run_until_complete(proxy.wait_closed())
+    brother.close()
     print ("PROXY: Successful finish")
-    return 0 #Successful exit
+    sys.exit(0) #Successful exit
     
 if __name__ == "__main__":
     main()
