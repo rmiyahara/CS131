@@ -21,6 +21,17 @@ def close_logfile(): # Closes the logfile file descriptor
     print("PROXY: File closed")
     return
 
+def format(stri): # Formats incoming command into a list
+    stri = stri.rstrip().strip().split()
+    return stri
+
+async def to_writer(writer, say): # Writes say into StreamWriter writer
+    say = say.encode()
+    writer.write(say)
+    await writer.drain()
+    writer.close()
+    return
+
 # Future documentation: https://docs.python.org/3/library/asyncio-eventloop.html#creating-futures-and-tasks
 async def client_handler(reader, writer):
     # Grab lines from reader
@@ -31,8 +42,16 @@ async def client_handler(reader, writer):
     print("PROXY: " + str(received_time))
     holdme = holdme.decode()
     logfile_fd.write('Received: ' + str(holdme) + '\n') #TODO: Format this, thanks
-    logfile_fd.flush()
+    logfile_fd.flush() # Fixes writing to file out of order bug
 
+    command = format(holdme)
+    if (not command):
+        await to_writer(writer, "Bad message: " + holdme)
+        logfile_fd.write('Bad message: ' + str(holdme) + '\n') #TODO: Format this, thanks
+        return
+    #TODO: Handle  IAMAT
+    #TODO: Handle WHATSAT
+        
     return
 
 def main():
