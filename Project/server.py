@@ -6,14 +6,14 @@ import json
 import time
 
 import serverinfo
+from clientinfo import Client
+
+client_list = []
+
 def checkservername(name): #Exits if server is not valid
     if name not in serverinfo.server_boiz:
         print("Please use a valid server name: " + str(serverinfo.server_boiz), file = sys.stderr)
         sys.exit(1)
-    return
-
-def launch_server(): # Starts server using asyncio
-    #https://docs.python.org/3/library/asyncio-stream.html#asyncio.start_server
     return
 
 def close_logfile(): # Closes the logfile file descriptor
@@ -46,10 +46,25 @@ async def client_handler(reader, writer):
 
     command = format(holdme)
     if (not command):
+        print("PROXY: Bad message")
         await to_writer(writer, "Bad message: " + holdme)
         logfile_fd.write('Bad message: ' + str(holdme) + '\n') #TODO: Format this, thanks
         return
-    #TODO: Handle  IAMAT
+    if (command[0] == "IAMAT"):
+        print("PROXY: IAMAT command received")
+        # Check valid arguments for command
+        if (len(command) != 4):
+            print("Please use the IAMAT command in the following manner: IAMAT [client-id] [ISO6709-location] [POSIX-time]", file = sys.stderr)
+            sys.exit(1)
+        client = Client(command[1], command[2], command[3])
+        client_list.append(client)
+        time_change = received_time - float(command[3])
+        if (time_change >= 0):
+            pos = "+"
+        else:
+            pos = "-"
+        await to_writer(writer, "AT " + name + " " + pos + str(time_change) + " " + client.id + " " + client.loc + " " + client.clock + '\n')
+        
     #TODO: Handle WHATSAT
         
     return
