@@ -14,7 +14,7 @@ async def confirm_connection(loop, say):
 
 def main():
     brother = asyncio.get_event_loop()
-    brother.run_until_complete(confirm_connection(brother, "IAMAT Isaac +34.0676828-118.4554165 1552560377.0\n"))
+    brother.run_until_complete(confirm_connection(brother, "AT Goloman +0.263873386 kiwi.cs.ucla.edu +34.068930-118.445127 1520023934.918963997\n"))
     brother.close()
     print("PROXY: Connection made")
     print("PROXY: Client finished")

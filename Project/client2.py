@@ -6,7 +6,7 @@ async def confirm_connection(loop, say):
     writer.write(say.encode())
     await writer.drain()
 
-    command = await reader.readline()
+    command = await reader.read(100000)
     command = command.decode()
     print(command)
     writer.close()
@@ -14,7 +14,7 @@ async def confirm_connection(loop, say):
 
 def main():
     brother = asyncio.get_event_loop()
-    brother.run_until_complete(confirm_connection(brother, "IAMAT Isaac +34.0676828-118.4554165 1552560377.0\n"))
+    brother.run_until_complete(confirm_connection(brother, "WHATSAT Isaac 10 10\n"))
     brother.close()
     print("PROXY: Connection made")
     print("PROXY: Client finished")
